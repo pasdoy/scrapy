@@ -76,16 +76,26 @@ class S3FilesStore(object):
     def __init__(self, uri):
         assert uri.startswith('s3://')
         self.bucket, self.prefix = uri[5:].split('/', 1)
+        from txaws.credentials import AWSCredentials
+        from txaws.s3.client import S3Client
+        from txaws.service import AWSServiceEndpoint
+        self.creds = AWSCredentials(self.AWS_ACCESS_KEY_ID, self.AWS_SECRET_ACCESS_KEY)
+        self.endpoint = AWSServiceEndpoint('http://s3-us-west-2.amazonaws.com')
+        self.client = S3Client(self.creds, self.endpoint)
+
+    def key_name(self, path):
+        return '%s%s' % (self.prefix, path)
 
     def stat_file(self, path, info):
-        def _onsuccess(boto_key):
-            checksum = boto_key.etag.strip('"')
-            last_modified = boto_key.last_modified
+        def _onsuccess(h):
+            checksum = h.get('etag')[0].strip('"')
+            last_modified = h.get('last-modified')[0]
             modified_tuple = rfc822.parsedate_tz(last_modified)
             modified_stamp = int(rfc822.mktime_tz(modified_tuple))
             return {'checksum': checksum, 'last_modified': modified_stamp}
-
-        return self._get_boto_key(path).addCallback(_onsuccess)
+        def _onerror(f):
+          return #forces re-download
+        return self.client.head_object(self.bucket, self.key_name(path)).addCallback(_onsuccess).addErrback(_onerror)
 
     def _get_boto_bucket(self):
         from boto.s3.connection import S3Connection
