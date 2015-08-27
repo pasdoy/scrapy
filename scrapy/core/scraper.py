@@ -202,7 +202,7 @@ class Scraper(object):
         if isinstance(output, Failure):
             ex = output.value
             if isinstance(ex, DropItem):
-                logkws = self.logformatter.dropped(item, ex, response, spider)
+                logkws = self.logformatter.dropped({}, ex, response, spider)
                 log.msg(spider=spider, **logkws)
                 return self.signals.send_catch_log_deferred(signal=signals.item_dropped, \
                     item=item, response=response, spider=spider, exception=output.value)
