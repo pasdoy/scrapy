@@ -33,7 +33,7 @@ class DropItem(Exception):
     """Drop item from the item pipeline"""
     pass
 
-class PipelineDropItem(Exception):
+class SilentDropItem(Exception):
     """Drop item from the item pipeline"""
     pass
 
