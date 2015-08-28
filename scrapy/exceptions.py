@@ -33,6 +33,11 @@ class DropItem(Exception):
     """Drop item from the item pipeline"""
     pass
 
+class PipelineDropItem(Exception):
+    """Drop item from the item pipeline"""
+    pass
+
+
 class NotSupported(Exception):
     """Indicates a feature or method is not supported"""
     pass
